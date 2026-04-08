@@ -191,88 +191,56 @@
         </div>
     </div>
 
-    <script>
-        const API_URL = "https://new-idea-analyzer-production.up.railway.app/api";
+   <script>
+    const API_URL = "https://new-idea-analyzer-production.up.railway.app/api";
 
-        async function validateIdea() {
-            const idea = document.getElementById('ideaInput').value;
-            if (!idea) return alert("Please enter an idea!");
+    async function validateIdea() {
+        const idea = document.getElementById('ideaInput').value;
+        if (!idea) return alert("Please enter an idea!");
 
-            // UI State: Loading
-            document.getElementById('btnValidate').disabled = true;
-            document.getElementById('btnValidate').innerText = "Analyzing...";
-            document.getElementById('loader').style.display = "block";
-            document.getElementById('reportView').style.display = "none";
+        // UI State: Loading
+        document.getElementById('btnValidate').disabled = true;
+        document.getElementById('btnValidate').innerText = "Analyzing...";
+        document.getElementById('loader').style.display = "block";
+        document.getElementById('reportView').style.display = "none";
 
-            try {
-                const response = await fetch(`${API_URL}/validate`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ idea: idea })
-                });
+        try {
+            const response = await fetch(`${API_URL}/validate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idea: idea })
+            });
 
-                if (!response.ok) throw new Error("API Failed");
+            if (!response.ok) throw new Error("API Failed");
 
-                const data = await response.json();
-                renderReport(data);
-                loadHistory(); // Refresh list
+            const data = await response.json();
+            renderReport(data);
 
-            } catch (error) {
-                alert("Error connecting to server. Is Spring Boot running?");
-                console.error(error);
-            } finally {
-                document.getElementById('btnValidate').disabled = false;
-                document.getElementById('btnValidate').innerText = "Validate Idea";
-                document.getElementById('loader').style.display = "none";
-            }
+        } catch (error) {
+            alert("Error connecting to server.");
+            console.error(error);
+        } finally {
+            document.getElementById('btnValidate').disabled = false;
+            document.getElementById('btnValidate').innerText = "Validate Idea";
+            document.getElementById('loader').style.display = "none";
         }
+    }
 
-        function renderReport(data) {
-            document.getElementById('reportView').style.display = "block";
-            
-            // Fill Data
-            document.getElementById('resScore').innerText = data.profitabilityScore + "/100";
-            
-            const riskEl = document.getElementById('resRisk');
-            riskEl.innerText = data.riskLevel;
-            riskEl.className = `risk ${data.riskLevel}`; // Applies color class
+    function renderReport(data) {
+        document.getElementById('reportView').style.display = "block";
 
-            document.getElementById('resProblem').innerText = data.problemSummary;
-            document.getElementById('resTarget').innerText = data.targetCustomer;
-            document.getElementById('resMarket').innerText = data.marketAnalysis;
-            document.getElementById('resCompetitors').innerText = data.competitors;
-            document.getElementById('resTech').innerText = data.techStack;
-        }
+        document.getElementById('resScore').innerText = data.profitabilityScore + "/100";
 
-        async function loadHistory() {
-            try {
-                const response = await fetch(`${API_URL}/ideas`);
-                const ideas = await response.json();
-                
-                const list = document.getElementById('historyList');
-                list.innerHTML = ""; // Clear current list
+        const riskEl = document.getElementById('resRisk');
+        riskEl.innerText = data.riskLevel;
+        riskEl.className = `risk ${data.riskLevel}`;
 
-                // Reverse to show newest first
-                ideas.reverse().forEach(idea => {
-                    const div = document.createElement('div');
-                    div.className = 'history-card';
-                    div.innerHTML = `
-                        <strong>${idea.originalIdea.substring(0, 50)}...</strong>
-                        <div style="font-size: 0.8em; color: #94a3b8; margin-top: 5px;">
-                            Score: ${idea.profitabilityScore} | Risk: ${idea.riskLevel}
-                        </div>
-                    `;
-                    // Click to view details again
-                    div.onclick = () => renderReport(idea);
-                    list.appendChild(div);
-                });
-            } catch (error) {
-                console.log("Could not fetch history");
-            }
-        }
-
-        // Load history on page load
-        window.onload = loadHistory;
-    </script>
+        document.getElementById('resProblem').innerText = data.problemSummary;
+        document.getElementById('resTarget').innerText = data.targetCustomer;
+        document.getElementById('resMarket').innerText = data.marketAnalysis;
+        document.getElementById('resCompetitors').innerText = data.competitors;
+        document.getElementById('resTech').innerText = data.techStack;
+    }
+</script>
 </body>
 </html>
